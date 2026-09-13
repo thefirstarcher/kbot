@@ -19,13 +19,15 @@ import (
 // startCmd represents the start command
 var startCmd = &cobra.Command{
 	Use:   "start",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Запустити Telegram-бота",
+	Long: `Запускає Telegram-бота
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Токен читається зі змінної середовища TELE_TOKEN.
+
+Команди бота:
+  /add <текст>   додати задачу
+  /list          показати список задач
+  /done <номер>  закрити задачу за номером`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var mu sync.Mutex
 		todos := make(map[int64][]string)
@@ -42,7 +44,10 @@ to quickly create a Cobra application.`,
 		}
 
 		b.Handle("/start", func(c tele.Context) error {
-			return c.Send("Hello, it is basic telebot todo list bot, that supports multiple commands:\n/add <text> - adds new todo task\n/list - shows list of current unfinished tasks\n/done <number> - closes task by number")
+			return c.Send("Це бот для трекінгу списку задач.\n\n" +
+				"/add <текст> - додати задачу\n" +
+				"/list - показати список задач\n" +
+				"/done <номер> - закрити задачу за номером")
 		})
 
 		b.Handle("/add", func(c tele.Context) error {
@@ -78,14 +83,14 @@ to quickly create a Cobra application.`,
 			payload := strings.TrimSpace(c.Message().Payload)
 			n, err := strconv.Atoi(payload)
 			if err != nil {
-				return c.Send("Має бути число ( наприклад /done 1 )")
+				return c.Send("Має бути число, наприклад /done 1")
 			}
 			chatID := c.Chat().ID
 			mu.Lock()
 			list := todos[chatID]
 			if n < 1 || n > len(list) {
 				mu.Unlock()
-				return c.Send("Відсутня задача с вказаним номером")
+				return c.Send("Немає задачі з таким номером")
 			}
 			i := n - 1
 			text := list[i]
