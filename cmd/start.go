@@ -6,6 +6,7 @@ package cmd
 import (
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -23,6 +24,9 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var mu sync.Mutex
+		todos := make(map[int64][]string)
+
 		pref := tele.Settings{
 			Token:  os.Getenv("TELE_TOKEN"),
 			Poller: &tele.LongPoller{Timeout: 10 * time.Second},
@@ -34,9 +38,17 @@ to quickly create a Cobra application.`,
 			return
 		}
 
-		b.Handle("/hello", func(c tele.Context) error {
-			return c.Send("Hello")
+		b.Handle("/start", func(c tele.Context) error {
+			return c.Send("Hello, it is basic telebot todo list bot, that supports multiple commands:\n/add <text> - adds new todo task\n/list - shows list of current unfinished tasks\n/done <number> - closes task by number")
 		})
+
+		b.Handle("/add", func(c tele.Context) error { mu.Lock(); defer mu.Unlock(); return c.Send("Not implemented") })
+		b.Handle("/list", func(c tele.Context) error { mu.Lock(); defer mu.Unlock(); return c.Send("Not implemented") })
+		b.Handle("/done", func(c tele.Context) error { mu.Lock(); defer mu.Unlock(); return c.Send("Not implemented") })
+		b.Handle(tele.OnPhoto, func(c tele.Context) error { return c.Send("Not implemented") })
+		b.Handle(tele.OnLocation, func(c tele.Context) error { return c.Send("Not implemented") })
+		b.Handle(tele.OnSticker, func(c tele.Context) error { return c.Send("Not implemented") })
+		b.Handle(tele.OnDocument, func(c tele.Context) error { return c.Send("Not implemented") })
 
 		b.Start()
 	},
