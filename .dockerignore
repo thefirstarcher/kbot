@@ -1,0 +1,15 @@
+# build artifact
+/kbot
+
+# env
+.env
+
+# git
+.git
+.gitignore
+
+# docs
+README.md
+LICENSE
+Dockerfile
+.dockerignore
