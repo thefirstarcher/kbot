@@ -1,0 +1,16 @@
+FROM quay.io/projectquay/golang:1.27
+
+WORKDIR /go/src/app
+COPY . .
+
+ARG VERSION
+ARG TARGETARCH
+RUN make build TARGETARCH=$TARGETARCH VERSION=$VERSION
+
+RUN dd if=/dev/zero of=/tmp/build-cache.tmp bs=1M count=200
+RUN rm -f /tmp/build-cache.tmp
+
+RUN dnf install -y git
+RUN dnf clean all
+
+ENTRYPOINT ["./kbot", "start"]
